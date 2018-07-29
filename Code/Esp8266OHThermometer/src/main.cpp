@@ -61,26 +61,26 @@ void setupWifi()
 
 void readAndSendTemperature() 
 {
-    double temperature = getTemperature();
-
-    http.begin(OH_ITEM_ADDRESS + String("/state"));
-    http.addHeader("Content-Type", "text/plain");
-    int returnCode = http.PUT(String(temperature, 4));
-
-    Serial.print("HTTP code: ");
-    Serial.println(returnCode);
-}
-
-double getTemperature()
-{
     sensors.requestTemperatures();
-    double temp = sensors.getTempCByIndex(0);
+    if (sensors.getDeviceCount() > 0)
+    {
+        double temperature = sensors.getTempCByIndex(0);
 
-    Serial.print("Temperature: ");
-    Serial.print(temp);
-    Serial.println("°C");
+        Serial.print("Temperature: ");
+        Serial.print(temperature);
+        Serial.println("°C");
 
-    return temp;
+        http.begin(OH_ITEM_ADDRESS + String("/state"));
+        http.addHeader("Content-Type", "text/plain");
+        int returnCode = http.PUT(String(temperature, 4));
+
+        Serial.print("HTTP code: ");
+        Serial.println(returnCode);
+    }
+    else
+    {
+        Serial.println("No temperature sensor found!");
+    }
 }
 
 char* concat(const char *s1, const char *s2)
