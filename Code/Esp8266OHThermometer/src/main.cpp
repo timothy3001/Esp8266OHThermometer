@@ -4,20 +4,11 @@
 #include <WiFiClient.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include "settings.h"
 
 extern "C" {
     #include "user_interface.h"
 }
-
-
-// You need to set the following parameters
-#define WIFI_AP "[WIFI-SSID]"
-#define WIFI_KEY "[WIFI-KEY]"
-#define OH_ITEM_ADDRESS "[OPENHAB-ITEM-ADDRESS]" // like http://openhabpi:8080/rest/items/My_Great_Temp_sensor NOTE: Enter the full item address only. No slash at the end!
-#define UPDATE_RATE 60 // in seconds
-
-// Should work if you followed the wiring
-#define ONEWIRE_BUS 2
 
 // Necessary objects
 OneWire oneWire(ONEWIRE_BUS);
@@ -33,7 +24,7 @@ char* concat(const char *s1, const char *s2);
 void setup() 
 {
     Serial.begin(115200);
-
+    sensors.begin();
     setupWifi();
 }
 
@@ -48,7 +39,11 @@ void setupWifi()
 {   
     wifi_station_set_hostname(concat("Esp-Thermometer-", WiFi.macAddress().c_str()));
     WiFi.mode(WIFI_STA);
-    wifi_set_sleep_type(LIGHT_SLEEP_T); // Enable light sleep
+    
+    // Enable light sleep for less power consumptino.  NOTE: Currently, LIGHT_SLEEP_T does not seem to work:
+    // https://github.com/esp8266/Arduino/issues/4485 
+
+    // wifi_set_sleep_type(LIGHT_SLEEP_T);    
 
     WiFi.begin(WIFI_AP, WIFI_KEY);
 
